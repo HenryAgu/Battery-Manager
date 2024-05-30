@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Orbitron:wght@400..900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&family=Sora:wght@100..800&display=swap"
+      rel="stylesheet"
+    />
+    <title>Battery Status Manager</title>
+  </head>
+  <body>
+    <button>My battery info</button>
+    <div>
+      <h1>Battery level: <span id="batteryLevel"></span></h1>
+      <h1>Charging: <span id="chargingInfo"></span></h1>
+      <h1>Charging Time: <span id="chargingTime"></span></h1>
+      <h1>Discharging Time: <span id="dischargingTime"></span></h1>
+    </div>
+    <script>
+      let btnGetInfo = document.querySelector("button");
+      let batteryLevel = document.querySelector("#batteryLevel");
+      let chargingInfo = document.querySelector("#chargingInfo");
+      let chargingTime = document.querySelector("#chargingTime");
+      let dischargingTime = document.querySelector("#dischargingTime");
+
+      btnGetInfo.addEventListener("click", updateInfo);
+      let battery;
+
+      async function updateInfo() {
+        if (!("getBattery" in navigator)) return;
+        if (battery) {
+          battery.removeEventListener("ChargingChange", updateChargingInfo);
+          battery.removeEventListener("levelChange", updateBatteryLevel);
+          battery.removeEventListener("chargingtimechange", updateChargingTime);
+          battery.removeEventListener(
+            "dischargingtimechange",
+            updatedischargingTime
+          );
+        }
+        battery = await navigator.getBattery();
+        updateBatteryLevel();
+        updateChargingInfo();
+        updateChargingTime();
+        updateDischargingTime();
+
+        battery.addEventListener("ChargingChange", updateChargingInfo);
+        battery.addEventListener("levelChange", updateBatteryLevel);
+        battery.addEventListener("chargingtimechange", updateChargingTime);
+        battery.addEventListener(
+          "dischargingtimechange",
+          updateDischargingTime
+        );
+      }
+
+      const updateBatteryLevel = () => {
+        const level = battery.level * 100;
+        batteryLevel.innerHTML = `${level}%`;
+
+        if (level > 50) {
+          batteryLevel.style.color = "green";
+        } else if (level > 20) {
+          batteryLevel.style.color = "orange";
+        } else {
+          batteryLevel.style.color = "red";
+        }
+      };
+      function updateChargingInfo() {
+        if(battery.charging){
+            chargingInfo.innerHTML =  "Yes";
+            chargingInfo.style.color = "green";
+        }else if(!battery.charging){
+            chargingInfo.innerHTML = "No";
+            chargingInfo.style.color = "red";
+        }
+      }
+
+      function updateChargingTime() {
+        if (battery.chargingTime === Infinity || !battery.charging) {
+          chargingTime.innerHTML = "Not Charging";
+        } else {
+          chargingTime.innerHTML = `${battery.chargingTime} seconds`;
+        }
+      }
+
+      const updateDischargingTime = () => {
+        dischargingTime.innerHTML = `${battery.dischargingTime} seconds`;
+      };
+    </script>
+  </body>
+</html>
