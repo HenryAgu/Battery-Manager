@@ -57,7 +57,7 @@
       }
 
       const updateBatteryLevel = () => {
-        const level = battery.level * 100;
+        const level = Math.round(battery.level * 100);
         batteryLevel.innerHTML = `${level}%`;
 
         if (level > 50) {
